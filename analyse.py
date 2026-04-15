@@ -1,84 +1,55 @@
-import pandas as pd
-from google import genai
 import os
 import time
-import warnings
+import pandas as pd
+from dotenv import load_dotenv
+from anthropic import Anthropic
 
-print("--- TEST SUCCESSFUL ---")
+load_dotenv()
+client = Anthropic(api_key=os.getenv("CLAUDE_API_KEY"))
 
-# --- 1. SILENCE THE NOISE ---
-# This hides the "Python 3.9" and "LibreSSL" warnings so you can see your data
-warnings.filterwarnings("ignore")
-os.environ['GRPC_PYTHON_SHOW_CYBER_HEALTH_CHECK'] = '0'
-
-# --- 2. SETUP ---
-# CRITICAL: Use the NEW key from a NEW project in AI Studio to bypass the 403 error
-API_KEY = ""
-MODEL_ID = "gemini-1.5-flash" 
-DB_FILE = "jobs.csv"
-
-client = genai.Client(
-    api_key=API_KEY,
-    http_options={'api_version': 'v1'} # Forces the stable production API
-)
-
-def get_gemini_insight(description):
-    """Sends job text to Gemini and returns 3 output-focused bullet points."""
-    prompt = f"""
-    Analyze this job description:
-    {description}
+def extract_job_details():
+    df = pd.read_csv('jobs.csv')
     
-    Provide exactly 3 bullet points explaining what the role actually PRODUCES day-to-day. 
-    Focus on tangible output (e.g., 'Maintains SQL pipelines', 'Drafts executive briefs').
-    """
-    
-    try:
-        response = client.models.generate_content(
-            model=MODEL_ID,
-            contents=prompt
-        )
-        return response.text.strip()
-    except Exception as e:
-        # If it fails, we want to know why in the terminal, not just the CSV
-        print(f"   ⚠️ Gemini failed on this row: {e}")
-        return f"Error: {e}"
+    # Initialize the column if it doesn't exist
+    if 'daily_tasks' not in df.columns:
+        df['daily_tasks'] = ""
 
-def run_analysis():
-    print("Checking for jobs.csv...")
-    if not os.path.exists(DB_FILE):
-        print(f"❌ Error: {DB_FILE} not found. Did you run scraper.py?")
-        return
+    # FILTER: Only look at 4s and 5s that haven't been analyzed yet
+    # Adjust 'Score' to match your exact column name (e.g., 'score' or 'Rating')
+    mask = (df['score'] >= 4) & (df['daily_tasks'].isna() | (df['daily_tasks'] == ""))
+    to_analyze = df[mask]
 
-    df = pd.read_csv(DB_FILE)
-    print(f"Loaded CSV with {len(df)} total rows.")
-    
-    if 'ai_insight' not in df.columns:
-        print("Column 'ai_insight' missing. Adding it now...")
-        df['ai_insight'] = ""
+    print(f"Found {len(to_analyze)} high-scoring jobs to analyze...")
 
-    # --- DEBUGGING THE FILTER ---
-    high_score_count = len(df[df['score'] >= 3])
-    print(f"Jobs with score >= 3: {high_score_count}")
-    
-    no_insight_count = len(df[(df['ai_insight'].isna()) | (df['ai_insight'] == "")])
-    print(f"Jobs with NO insight yet: {no_insight_count}")
+    for index, row in to_analyze.iterrows():
+        print(f"Extracting details for: {row['title']}...")
 
-    # The actual filter
-    mask = (df['score'] >= 3)
-    targets = df[mask]
-    
-    print(f"Combined filter found {len(targets)} jobs to process.")
+        try:
+            # Using the 2026 Sonnet 4.6 model
+            message = client.messages.create(
+                model="claude-sonnet-4-6",
+                max_tokens=150,
+                temperature=0,
+                system="You are a career coach. Extract only the concrete daily outputs of a job.",
+                messages=[{
+                    "role": "user", 
+                    "content": f"Based on this job snippet, what does the person actually produce or do every day? Summarize in 2 bullet points. \nSnippet: {row['snippet']}"
+                }]
+            )
+            
+            tasks = message.content[0].text.strip()
+            df.at[index, 'daily_tasks'] = tasks
+            print(f"✅ Success")
+            
+            # Save progress immediately
+            df.to_csv('jobs.csv', index=False)
+            time.sleep(0.5) 
 
-    if not targets.empty:
-        for idx, row in targets.iterrows():
-            print(f"🧐 Now attempting to analyze: {row['title']}...")
-            insight = get_gemini_insight(row['snippet'])
-            df.at[idx, 'ai_insight'] = insight
-            df.to_csv(DB_FILE, index=False)
-            print(f"✅ Success for {row['title']}. Sleeping 6s...")
-            time.sleep(6) 
-    else:
-        print("Empty-handed! Either no scores are high enough, or they all have insights already.")
+        except Exception as e:
+            print(f"❌ Error on {row['title']}: {e}")
+            continue
+
+    print("Done! Check your jobs.csv for the 'Daily_Tasks' column.")
 
 if __name__ == "__main__":
-    run_analysis()
+    extract_job_details()

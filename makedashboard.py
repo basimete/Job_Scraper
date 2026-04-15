@@ -23,7 +23,7 @@ def create_filtered_dashboard():
         return t.strip()
 
     # 3. Apply cleaning to data
-    for col in ['title', 'company', 'snippet', 'date', 'ai_insight']:
+    for col in ['title', 'company', 'snippet', 'date', 'daily_tasks']:
         if col in df.columns:
             df[col] = df[col].apply(final_clean)
 
@@ -35,8 +35,8 @@ def create_filtered_dashboard():
     df['Source'] = df.apply(make_link, axis=1)
 
     # AI Insights formatting (Removing blue color)
-    df['ai_insight'] = df['ai_insight'].str.replace('•', '<br>•')
-    df['ai_insight'] = '<div class="insight-text">' + df['ai_insight'] + '</div>'
+    df['daily_tasks'] = df['daily_tasks'].str.replace('•', '<br>•')
+    df['daily_tasks'] = '<div class="task-text">' + df['daily_tasks'] + '</div>'
 
     # Accordion Snippets
     def make_accordion(text):
@@ -46,7 +46,7 @@ def create_filtered_dashboard():
     df['snippet'] = df['snippet'].apply(make_accordion)
 
     # 5. Select and Order Columns
-    cols = ['date', 'score', 'title', 'Source', 'ai_insight', 'snippet']
+    cols = ['date', 'score', 'title', 'Source', 'daily_tasks', 'snippet']
     df = df[[c for c in cols if c in df.columns]]
 
     # 6. Convert to HTML Table
