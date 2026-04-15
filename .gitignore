@@ -1,0 +1,14 @@
+# Secrets
+.env
+
+# Data and Logs
+jobs.csv
+*.log
+
+# Python system files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Mac system files
+.DS_Store
