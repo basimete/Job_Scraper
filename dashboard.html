@@ -1,0 +1,89 @@
+
+    <!DOCTYPE html>
+    <html>
+    <head>
+        <meta charset="UTF-8">
+        <style>
+            body { font-family: -apple-system, system-ui, sans-serif; margin: 20px; background: #fafafa; }
+            .container { max-width: 98%; margin: auto; }
+            h1 { color: #202124; font-size: 24px; padding-left: 10px; }
+
+            .job-table { 
+                border-collapse: collapse; 
+                width: 100%; 
+                background: white; 
+                table-layout: fixed; 
+                box-shadow: 0 1px 3px rgba(0,0,0,0.1); 
+            }
+            
+            .job-table th { background: #f8f9fa; color: #5f6368; padding: 12px; text-align: left; font-size: 11px; text-transform: uppercase; border-bottom: 2px solid #eee; }
+            .job-table td { padding: 12px; border-bottom: 1px solid #f1f3f4; vertical-align: top; font-size: 13px; overflow: hidden; }
+
+            /* --- FIXED COLUMN WIDTHS --- */
+            th:nth-child(1) { width: 90px; }   /* Date */
+            th:nth-child(2) { width: 50px; text-align: center; }  /* Score */
+            th:nth-child(3) { width: 180px; }  /* Title */
+            th:nth-child(4) { width: 130px; }  /* Source */
+            th:nth-child(5) { width: 400px; }  /* AI Insight */
+            th:nth-child(6) { width: 600px; }  /* Snippet - WIDEST */
+
+            /* AI Insight Text (Now Dark Grey, Not Blue) */
+            .insight-text { line-height: 1.6; color: #3c4043; font-weight: 500; }
+
+            /* Source Link Styling */
+            .source-link { color: #1a73e8; text-decoration: none; font-weight: bold; border-bottom: 1px solid transparent; }
+            .source-link:hover { border-bottom: 1px solid #1a73e8; }
+
+            /* Snippet/Accordion Styling */
+            details { cursor: pointer; background: #f1f3f4; padding: 10px; border-radius: 4px; width: 95%; }
+            summary { font-size: 11px; color: #5f6368; outline: none; font-weight: bold; }
+            .full-text { 
+                margin-top: 10px; 
+                font-size: 13px; 
+                color: #3c4043; 
+                line-height: 1.6; 
+                background: white; 
+                padding: 15px; 
+                border: 1px solid #eee; 
+                white-space: pre-wrap; 
+                width: 95%;
+            }
+        </style>
+    </head>
+    <body>
+        <div class="container">
+            <h1>🚀 Job Search Dashboard</h1>
+            <table class="dataframe job-table">
+  <thead>
+    <tr style="text-align: right;">
+      <th>date</th>
+      <th>score</th>
+      <th>title</th>
+      <th>Source</th>
+      <th>ai_insight</th>
+      <th>snippet</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Wed, 15 Apr 2026 02:44:55 GMT</td>
+      <td>4</td>
+      <td>Haystack hiring Data Analyst in London, England, United Kingdom</td>
+      <td><a href="https://uk.linkedin.com/jobs/view/data-analyst-at-haystack-4402092675" target="_blank" class="source-link">LinkedIn</a></td>
+      <td><div class="insight-text">Error: 403 PERMISSION_DENIED. {'error': {'code': 403, 'message': 'Your project has been denied access. Please contact support.', 'status': 'PERMISSION_DENIED'}}</div></td>
+      <td><details><summary>Data Analyst | £44,290 - £47,800 We're working wit...</summary><div class="full-text">Data Analyst | £44,290 - £47,800 We're working with a major high-impact enterprise organisation managing a complex, large-scale digital ecosystem on this exciting opportunity. We are looking for a data detective who can bridge the gap between technical infrastructure and operational excellence by ensuring seamless data flow across CRM, HR, and Finance platforms. This isn't a typical dashboards-and-reporting role; you will be the primary troubleshooter for business-critical integrations using SQL to interrogate relational databases and solve complex data mapping puzzles. If you enjoy hunting down root causes in complex data environments, this is the challenge for you. The Role Lead the investigation into data discrepancies and failed integrations across a multi-system enterprise landscape. Perform deep-dive analysis on source and target systems to understand complex mapping and transformation logic. Partner with diverse stakeholders to resolve data quality issues at the source, ensuring long-term integration reliability. Monitor ongoing data health and develop strategies for reconciliation across platforms like CRM, learning systems, and financial tools. Act as the data subject matter expert within a specialist integration team, focusing on data integrity rather than software development. What You'll Need Expert-level SQL skills with extensive experience querying relational databases such as SQL Server, Oracle, or MySQL. Proven track record of troubleshooting data issues within an ETL or integrated system environment. Strong understanding of data mapping, transformation logic, and complex reconciliation processes. Experience working within large-scale organisations (e.g., Public Sector, Finance, Education, or Healthcare) managing multiple stakeholder groups. A methodical, persistent, and detail-oriented approach to problem-solving and root-cause analysis. What's On Offer Competitive salary up to £47,800 plus a generous pension scheme and annual leave allowance. Rapid professional development opportunities within a technically challenging and supportive environment. Hybrid working model based in a prime London location (2 days per week onsite). 12-month fixed-term contract with the potential to make a visible impact on large-scale digital operations. Apply via Haystack today!</div></details></td>
+    </tr>
+    <tr>
+      <td>Sun, 12 Apr 2026 10:03:32 GMT</td>
+      <td>3</td>
+      <td>Netflix hiring Data Analyst, EMEA Production Finance in London, England, United Kingdom</td>
+      <td><a href="https://uk.linkedin.com/jobs/view/data-analyst-emea-production-finance-at-netflix-4355850311" target="_blank" class="source-link">LinkedIn</a></td>
+      <td><div class="insight-text">Error: 403 PERMISSION_DENIED. {'error': {'code': 403, 'message': 'Your project has been denied access. Please contact support.', 'status': 'PERMISSION_DENIED'}}</div></td>
+      <td><details><summary>Netflix is one of the world's leading entertainmen...</summary><div class="full-text">Netflix is one of the world's leading entertainment services, with over 300 million paid memberships in over 190 countries enjoying TV series, films and games across a wide variety of genres and languages. Members can play, pause and resume watching as much as they want, anytime, anywhere, and can change their plans at any time. The Opportunity This position will play a critical role in supporting the Production Finance team and key cross-functional partners across a range of data-related projects. The ideal candidate thrives in a fast-paced, collaborative environment, has strong data skills, and is passionate about innovation. Responsibilities include delivering rapid, high-profile analyses using show-level data to support Public Relations & Government Relations teams in EMEA and globally, as well as providing guidance and support to non-technical stakeholders. The position involves quick-turnaround analysis, occasional longer-term strategic projects, and will dual-report to the Production Finance team in the UK and the Production Finance Operations & Innovation team in Los Angeles. Responsibilities Data Extraction & Transformation: Extract, clean, and transform data from core systems such as the Global Spend Report (GSR) data model, Payroll Accounting Systems (PAS), and the Netflix Production Finance HUB. Aggregate and correlate data to accurately report on job counts, vendor spend, and location spend across multiple EMEA markets. Cross-Functional Collaboration: Work closely with stakeholders including Production Finance, Public Relations & Government Relations (PRGR), Finance & Strategy (F&S), Data Science & Engineering, and Studio Tech Solutions. Act as a proactive thought partner, translating complex business needs into actionable data solutions. PRGR Data Support: Deliver validated production finance data to support PRGR teams, ensuring data coverage, accuracy, and completeness for global reporting. Identify optimal data sources and continuously improve data quality and model integrity. Ad Hoc & Strategic Analysis: Engage in both rapid-turnaround ad hoc analyses (e.g., show-level spend, vendor breakdowns, cast and crew location analytics) and longer-term strategic projects (e.g., trend analysis, workflow optimization). Provide actionable insights and clear reporting to support decision-making. Technical Development & Workflow Improvement: Develop expertise in the GSR data model, identifying data inconsistencies and recommending improvements to data collection and validation processes. Explore and utilize data tables owned by adjacent business partners to enhance data coverage and integration. Data Visualization & Reporting: Analyze structured datasets to develop metrics, dashboards, and trend reports using data visualization tools such as Google Sheets, Looker, Tableau, or similar platforms. Present insights in a clear, accessible manner to both technical and non-technical stakeholders. System & Tool Experimentation: Proactively engage in s</div></details></td>
+    </tr>
+  </tbody>
+</table>
+        </div>
+    </body>
+    </html>
+    

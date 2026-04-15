@@ -34,7 +34,7 @@ for e in feed.entries:
                 "link":    e.link,
                 "score":   s,
                 "date":    e.get("published", ""),
-                "snippet": body[:300]
+                "snippet": body[:3000]
             })
 
 # 3. Combine and Save
