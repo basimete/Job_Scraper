@@ -1,4 +1,4 @@
-#!/Users/baileymelvin-teng/Documents/JobScraper/Job_Scraper/.venv/bin/python3
+#!/Users/baileymelvin-teng/Documents/Job_Scraper/.venv/bin/python3
 # -*- coding: utf-8 -*-
 import re
 import sys
