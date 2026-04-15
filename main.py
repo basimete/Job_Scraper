@@ -1,7 +1,8 @@
 import feedparser
 import pandas as pd
 import os
-from cleaning import clean_html  
+from cleaning import clean_html
+from makedashboard import create_filtered_dashboard
 
 SIGNAL = ["sql","python","etl","pipeline","dbt","data quality","data integrity","warehouse","automation","transformation","cleaning"]
 RED    = ["storytelling","stakeholder","insights","influence","strategic","policy","translate data","senior leadership"]
@@ -44,5 +45,6 @@ if new_rows:
     df_final = df_final.sort_values("score", ascending=False)
     df_final.to_csv(DB_FILE, index=False)
     print(f"Added {len(new_rows)} new jobs. Total jobs: {len(df_final)}")
+    create_filtered_dashboard() # Trigger dashboard update
 else:
     print("No new jobs found today.")

@@ -10,8 +10,8 @@ def create_filtered_dashboard():
 
     # 1. Load and Filter
     df = pd.read_csv(csv_file)
+    df['score'] = pd.to_numeric(df['score'], errors='coerce').fillna(0).astype(int)
     df = df[df['score'] >= 3].copy()
-    df = df.sort_values(by='score', ascending=False)
 
     # 2. Aggressive Cleaning Function
     def final_clean(text):
@@ -35,8 +35,9 @@ def create_filtered_dashboard():
     df['Source'] = df.apply(make_link, axis=1)
 
     # AI Insights formatting (Removing blue color)
-    df['daily_tasks'] = df['daily_tasks'].str.replace('•', '<br>•')
     df['daily_tasks'] = '<div class="task-text">' + df['daily_tasks'] + '</div>'
+    df['daily_tasks'] = df['daily_tasks'].fillna("Detailed summary only available for 4+ star matches.")
+    df['daily_tasks'] = df['daily_tasks'].str.replace('•', '<br>•')
 
     # Accordion Snippets
     def make_accordion(text):
@@ -118,6 +119,8 @@ def create_filtered_dashboard():
         f.write(html_content)
     
     print("✨ Dashboard Ready! Widths balanced and AI text color fixed.")
+
+    df['daily_tasks'] = df['daily_tasks'].fillna("Pending AI Analysis...")
 
 if __name__ == "__main__":
     create_filtered_dashboard()

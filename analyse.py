@@ -1,8 +1,9 @@
+#i can run this ad hoc to create a dahsboard and do the AI analysis, it's not automated.
 import os
-import time
 import pandas as pd
 from dotenv import load_dotenv
 from anthropic import Anthropic
+from makedashboard import create_filtered_dashboard
 
 load_dotenv()
 client = Anthropic(api_key=os.getenv("CLAUDE_API_KEY"))
@@ -10,46 +11,40 @@ client = Anthropic(api_key=os.getenv("CLAUDE_API_KEY"))
 def extract_job_details():
     df = pd.read_csv('jobs.csv')
     
-    # Initialize the column if it doesn't exist
+    # Ensure column exists in lowercase
     if 'daily_tasks' not in df.columns:
         df['daily_tasks'] = ""
 
-    # FILTER: Only look at 4s and 5s that haven't been analyzed yet
-    # Adjust 'Score' to match your exact column name (e.g., 'score' or 'Rating')
-    mask = (df['score'] >= 4) & (df['daily_tasks'].isna() | (df['daily_tasks'] == ""))
+    # FILTER: 
+    # 1. Score is 4 or 5
+    # 2. daily_tasks is empty (handling NaN and empty strings)
+    mask = (df['score'] >= 4) & (df['daily_tasks'].fillna('').str.strip() == "")
     to_analyze = df[mask]
 
-    print(f"Found {len(to_analyze)} high-scoring jobs to analyze...")
+    print(f"⏭️ Skipping {len(df) - len(to_analyze)} rows (already done or low score).")
+    print(f"🤖 Processing {len(to_analyze)} new high-scoring rows...")
+    create_filtered_dashboard() # Trigger dashboard update
 
     for index, row in to_analyze.iterrows():
-        print(f"Extracting details for: {row['title']}...")
-
         try:
-            # Using the 2026 Sonnet 4.6 model
+            print(f"Analyzing: {row['title']}...")
             message = client.messages.create(
                 model="claude-sonnet-4-6",
-                max_tokens=150,
+                max_tokens=200,
                 temperature=0,
-                system="You are a career coach. Extract only the concrete daily outputs of a job.",
                 messages=[{
                     "role": "user", 
-                    "content": f"Based on this job snippet, what does the person actually produce or do every day? Summarize in 2 bullet points. \nSnippet: {row['snippet']}"
+                    "content": f"Based on this job: {row['title']} - {row['snippet']}. List 3 bullet points of what the candidate actually PRODUCES day-to-day."
                 }]
             )
             
-            tasks = message.content[0].text.strip()
-            df.at[index, 'daily_tasks'] = tasks
-            print(f"✅ Success")
-            
-            # Save progress immediately
+            df.at[index, 'daily_tasks'] = message.content[0].text.strip()
             df.to_csv('jobs.csv', index=False)
-            time.sleep(0.5) 
+            print("✅ Success")
 
         except Exception as e:
-            print(f"❌ Error on {row['title']}: {e}")
-            continue
-
-    print("Done! Check your jobs.csv for the 'Daily_Tasks' column.")
+            print(f"❌ Error: {e}")
+            break
 
 if __name__ == "__main__":
     extract_job_details()
