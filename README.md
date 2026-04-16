@@ -1,5 +1,7 @@
 # 🚀 AI Job Hunter & Dashboard
 
+Ingests job listings from RSS feeds, scores by technical signal words, pipes top results to Claude API to extract what the role actually outputs day-to-day. Built to solve a real problem in my own job search - data analyst roles can be a huge variety of things! 
+
 A modularized job search pipeline designed to filter out the noise and highlight high-quality technical opportunities. This system uses keyword-based scoring to rank jobs and Anthropic's Claude AI to summarize day-to-day responsibilities for top-tier matches.
 
 ## 🛠️ System Architecture
