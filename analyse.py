@@ -34,7 +34,8 @@ def extract_job_details():
                 temperature=0,
                 messages=[{
                     "role": "user", 
-                    "content": f"Based on this job: {row['title']} - {row['snippet']}. List 3 bullet points of what the candidate actually PRODUCES day-to-day."
+                    "content": f"Based on this job: {row['title']} - {row['snippet']}. "
+                    "List 3 bullet points of what the candidate actually PRODUCES day-to-day. Return ONLY the bullet points. Do not include introductory or concluding text."
                 }]
             )
             
