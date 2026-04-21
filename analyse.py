@@ -1,4 +1,3 @@
-#i can run this ad hoc to create a dahsboard and do the AI analysis, it's not automated.
 import os
 import pandas as pd
 from dotenv import load_dotenv
@@ -8,28 +7,35 @@ from makedashboard import create_filtered_dashboard
 load_dotenv()
 client = Anthropic(api_key=os.getenv("CLAUDE_API_KEY"))
 
-def extract_job_details():
-    df = pd.read_csv('jobs.csv')
+# Define the files to process
+FILES_TO_ANALYZE = ["london_jobs.csv", "wellington_jobs.csv", "xchurch_jobs.csv"]
+
+def analyze_file(csv_file):
+    if not os.path.exists(csv_file):
+        print(f"--- Skipping {csv_file} (File not found) ---")
+        return
+
+    print(f"--- Starting AI Analysis for {csv_file} ---")
+    df = pd.read_csv(csv_file)
     
-    # Ensure column exists in lowercase
     if 'daily_tasks' not in df.columns:
         df['daily_tasks'] = ""
 
-    # FILTER: 
-    # 1. Score is 4 or 5
-    # 2. daily_tasks is empty (handling NaN and empty strings)
+    # FILTER: Score >= 4 and daily_tasks is empty
     mask = (df['score'] >= 4) & (df['daily_tasks'].fillna('').str.strip() == "")
     to_analyze = df[mask]
 
-    print(f"⏭️ Skipping {len(df) - len(to_analyze)} rows (already done or low score).")
+    if to_analyze.empty:
+        print(f"✅ No new high-scoring jobs to analyze in {csv_file}.")
+        return
+
     print(f"🤖 Processing {len(to_analyze)} new high-scoring rows...")
-    create_filtered_dashboard() # Trigger dashboard update
 
     for index, row in to_analyze.iterrows():
         try:
             print(f"Analyzing: {row['title']}...")
             message = client.messages.create(
-                model="claude-sonnet-4-6",
+                model="claude-sonnet-4-6", # Note: Standardizing to current model name
                 max_tokens=200,
                 temperature=0,
                 messages=[{
@@ -39,13 +45,18 @@ def extract_job_details():
                 }]
             )
             
+            # Save progress row-by-row so you don't lose credits if it crashes
             df.at[index, 'daily_tasks'] = message.content[0].text.strip()
-            df.to_csv('jobs.csv', index=False)
+            df.to_csv(csv_file, index=False)
             print("✅ Success")
 
         except Exception as e:
-            print(f"❌ Error: {e}")
-            break
+            print(f"❌ Error during AI call: {e}")
+            return # Exit this file if there is an API error
+
+def run_ai_analysis():
+    for csv_file in FILES_TO_ANALYZE:
+        analyze_file(csv_file)
 
 if __name__ == "__main__":
-    extract_job_details()
+    run_ai_analysis()
