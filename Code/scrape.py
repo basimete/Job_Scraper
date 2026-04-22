@@ -4,14 +4,19 @@ import os
 from cleaning import clean_html
 from makedashboard import create_filtered_dashboard
 
+# 1. FIX THE PATHING LOGIC
+# BASE_DIR is /Job_Scraper/code
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+
+# Move up one level to /Job_Scraper, then down into /CSV_files
+CSV_DIR = os.path.normpath(os.path.join(BASE_DIR, "..", "CSV_files"))
 
 SIGNAL = ["excel","sql","python","etl","pipeline","dbt","data quality","data integrity","warehouse","automation","transformation","cleaning"]
 RED    = ["storytelling","stakeholder","insights","influence","strategic","policy","translate data","senior leadership","narrative", "communicate to non-technical", "business partnering", "commercial acumen", "data-driven culture"]
 
-# Define your feeds and their corresponding filenames
 FEEDS = [
-    {"name": "londonrss",     "url": "https://rss.app/feeds/xLVD44xRiE1A5RDp.xml",      "file": "london_jobs.csv"},
-    {"name": "wellingtonrss", "url": "https://rss.app/feeds/maBHYOfvMWL0hlLj.xml",  "file": "wellington_jobs.csv"},
+    {"name": "londonrss",     "url": "https://rss.app/feeds/xLVD44xRiE1A5RDp.xml", "file": "london_jobs.csv"},
+    {"name": "wellingtonrss", "url": "https://rss.app/feeds/maBHYOfvMWL0hlLj.xml", "file": "wellington_jobs.csv"},
     {"name": "xchurchrss",    "url": "https://rss.app/feeds/EVDHE0YpoOwAWE4D.xml", "file": "xchurch_jobs.csv"}
 ]
 
@@ -20,18 +25,26 @@ def score(text):
     return sum(1 for w in SIGNAL if w in t) - sum(1 for w in RED if w in t)
 
 def process_feed(feed_config):
-    db_file = feed_config["file"]
+    # 2. BUILD THE ABSOLUTE PATH TO THE FILE
+    db_file = os.path.join(CSV_DIR, feed_config["file"])
+    
+    # Ensure the /CSV_files/ directory exists (up one level from /code)
+    if not os.path.exists(CSV_DIR):
+        os.makedirs(CSV_DIR)
+        print(f"Created directory: {CSV_DIR}")
+
     print(f"--- Processing {feed_config['name']} ---")
 
-    # 1. Load existing jobs
+    # 3. LOAD EXISTING JOBS
     if os.path.exists(db_file):
         df_existing = pd.read_csv(db_file)
         existing_links = set(df_existing['link'])
     else:
+        print(f"No existing file found at {db_file}, creating new.")
         df_existing = pd.DataFrame()
         existing_links = set()
 
-    # 2. Fetch the feed
+    # 4. FETCH THE FEED
     feed = feedparser.parse(feed_config["url"])
 
     new_rows = []
@@ -49,7 +62,7 @@ def process_feed(feed_config):
                     "snippet": body[:3000]
                 })
 
-    # 3. Combine and Save
+    # 5. COMBINE AND SAVE
     if new_rows:
         df_new = pd.DataFrame(new_rows)
         df_final = pd.concat([df_existing, df_new], ignore_index=True)
@@ -59,7 +72,6 @@ def process_feed(feed_config):
     else:
         print(f"No new jobs for {feed_config['name']}.")
 
-# Main execution loop
 def run_scraper():
     for f in FEEDS:
         process_feed(f)

@@ -2,23 +2,40 @@ import pandas as pd
 import os
 import re
 
-# Add 'csv_file' and 'output_html' as parameters
-def create_filtered_dashboard(csv_file='jobs.csv', output_html='dashboard.html'):
-    if not os.path.exists(csv_file):
-        print(f"❌ Error: {csv_file} not found.")
+# 1. SETUP PATHS
+# Script is in /Job_Scraper/code
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+
+# Data is in /Job_Scraper/CSV_files
+CSV_DIR = os.path.normpath(os.path.join(BASE_DIR, "..", "CSV_files"))
+
+# UPDATED: Output dashboards now go to /Job_Scraper/Dashboards
+OUTPUT_DIR = os.path.normpath(os.path.join(BASE_DIR, "..", "Dashboards"))
+
+# Ensure the Dashboards directory exists so the script doesn't crash
+if not os.path.exists(OUTPUT_DIR):
+    os.makedirs(OUTPUT_DIR)
+    print(f"📁 Created new directory: {OUTPUT_DIR}")
+
+def create_filtered_dashboard(csv_filename, html_filename):
+    # Construct full paths using the directory variables
+    csv_path = os.path.join(CSV_DIR, csv_filename)
+    output_path = os.path.join(OUTPUT_DIR, html_filename)
+
+    if not os.path.exists(csv_path):
+        print(f"❌ Error: {csv_path} not found.")
         return
 
     # 1. Load and Filter
-    df = pd.read_csv(csv_file)
-    # Ensure there is data to process
+    df = pd.read_csv(csv_path)
     if df.empty:
-        print(f"⚠️ {csv_file} is empty. Skipping.")
+        print(f"⚠️ {csv_filename} is empty. Skipping.")
         return
 
     df['score'] = pd.to_numeric(df['score'], errors='coerce').fillna(0).astype(int)
     df = df[df['score'] >= 3].copy()
 
-    # ... [Keep all your cleaning and formatting functions exactly the same] ...
+    # --- [Cleaning and formatting functions] ---
     def final_clean(text, is_ai_task=False):
         if pd.isna(text) or text == "" or text == "nan": return ""
         t = str(text)
@@ -68,22 +85,19 @@ def create_filtered_dashboard(csv_file='jobs.csv', output_html='dashboard.html')
     
     display_df['snippet'] = display_df['snippet'].apply(make_accordion)
 
-    # 5. Select and Order Columns
     cols = ['date', 'score', 'title', 'Source', 'daily_tasks', 'snippet']
     display_df = display_df[[c for c in cols if c in display_df.columns]]
 
-    # 6. Convert to HTML Table
     html_table = display_df.to_html(classes='job-table', index=False, escape=False, border=0)
 
-    # 7. The Full HTML Wrapper (Updated Title to reflect location)
-    location_name = csv_file.replace('_jobs.csv', '').title()
+    location_name = csv_filename.replace('_jobs.csv', '').title()
+    
     html_content = f"""
     <!DOCTYPE html>
     <html lang="en">
     <head>
         <meta charset="UTF-8">
         <style>
-            /* ... [Keep your CSS exactly the same] ... */
             :root {{ --bg: #f4f7f9; --text: #2c3e50; --border: #dcdfe6; }}
             body {{ font-family: 'Inter', -apple-system, sans-serif; margin: 20px; background: var(--bg); color: var(--text); }}
             .container {{ max-width: 100%; margin: auto; }}
@@ -96,6 +110,7 @@ def create_filtered_dashboard(csv_file='jobs.csv', output_html='dashboard.html')
             .insight-text {{ line-height: 1.5; color: #333; font-size: 12.5px; }}
             details {{ cursor: pointer; background: #f8f9fa; padding: 6px 10px; border-radius: 4px; border: 1px solid #ebeef5; }}
             .full-text {{ margin-top: 10px; font-size: 12px; background: white; padding: 10px; border: 1px solid #eee; white-space: pre-wrap; }}
+            .muted {{ color: #999; font-style: italic; }}
         </style>
     </head>
     <body>
@@ -107,14 +122,12 @@ def create_filtered_dashboard(csv_file='jobs.csv', output_html='dashboard.html')
     </html>
     """
 
-    with open(output_html, 'w', encoding='utf-8') as f:
+    with open(output_path, 'w', encoding='utf-8') as f:
         f.write(html_content)
     
-    print(f"✨ Dashboard Ready: {output_html}")
+    print(f"✨ Dashboard Ready: {output_path}")
 
-# This part runs when you execute the script directly
 if __name__ == "__main__":
-    # Define your mappings
     jobs_to_dashboards = [
         ("london_jobs.csv", "london_dashboard.html"),
         ("wellington_jobs.csv", "wellington_dashboard.html"),
