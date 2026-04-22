@@ -2,8 +2,9 @@
 .env
 
 # Data and Logs
-jobs.csv
 *.log
+*.csv
+*.html
 
 # Python system files
 __pycache__/

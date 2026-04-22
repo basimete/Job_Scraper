@@ -1,4 +1,4 @@
-from scrape import run_scraper
+from scraper import run_scraper
 from analyse import run_ai_analysis
 from makedashboard import create_filtered_dashboard
 
